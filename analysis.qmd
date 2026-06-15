@@ -12,6 +12,7 @@ library(tidyverse)
 library(primer.data)
 library(tidymodels)
 library(broom)
+library(gt)
 ```
 
 ```{r}
@@ -40,19 +41,23 @@ x |>
 ```
 
 ```{r}
-x |> count(treatment)
-```
-
-```{r}
-linear_reg(engine = "lm") |> fit(t2_health_exp_3m ~ treatment + age, data = x)
-```
-
-```{r}
 #| cache: true
 fit_sp <- linear_reg(engine = "lm") |> fit(t2_health_exp_3m ~ treatment, data = x)
 ```
 
-Public health insurance programs aim to reduce the financial burden of medical care on households, particularly out-of-pocket spending that can push families toward poverty. Using data from a randomized rollout of Mexico's Seguro Popular program, evaluated by King et al. (2009) across roughly 27,500 households in seven states, we estimate the average causal effect of enrollment on three-month out-of-pocket health spending. However, because t2_health_exp_3m is heavily right-skewed, with a median of 150 pesos but a maximum past 37,000, a linear model assuming normally distributed errors may poorly capture the true distribution of spending and could be unduly influenced by extreme outliers.
+```{r}
+tidy(fit_sp, conf.int = TRUE) |>
+  select(term, estimate, conf.low, conf.high) |>
+  mutate(across(c(estimate, conf.low, conf.high), \(x) signif(x, 3))) |>
+  gt() |>
+  tab_header(title = "Estimates and 95% Confidence Intervals for Parameters",
+             subtitle = "Source: King et al. (2009) via primer.data::sps")
+```
+
+Public health insurance programs aim to reduce the financial burden of medical care on households, particularly out-of-pocket spending that can push families toward poverty. Using data from a randomized rollout of Mexico's Seguro Popular program, evaluated by King et al. (2009) across roughly 27,500 households in seven states, we estimate the average causal effect of enrollment on three-month out-of-pocket health spending. However, because t2_health_exp_3m is heavily right-skewed, with a median of 150 pesos but a maximum past 37,000, a linear model assuming normally distributed errors may poorly capture the true distribution of spending and could be unduly influenced by extreme outliers. We model t2_health_exp_3m, three-month out-of-pocket health spending in pesos, as a linear function of treatment, the randomized assignment to early Seguro Popular enrollment.
+
+
+
 
 
 

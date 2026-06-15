@@ -13,6 +13,7 @@ library(primer.data)
 library(tidymodels)
 library(broom)
 library(gt)
+library(marginaleffects)
 ```
 
 ```{r}
@@ -25,36 +26,28 @@ x <- sps |>
 ```
 
 ```{r}
-x |>
-  filter(t2_health_exp_3m <= 5000) |>
-  ggplot(aes(x = treatment, y = t2_health_exp_3m, color = treatment)) +
-  geom_jitter(width = 0.2, alpha = 0.4) +
-  stat_summary(fun = mean, geom = "point", size = 4, shape = 18, color = "black") +
-  labs(
-    title = "Three-Month Out-of-Pocket Health Spending by Seguro Popular Enrollment",
-    subtitle = "Black diamonds show group means; spending is capped at 5,000 pesos for visibility",
-    x = "Treatment Group",
-    y = "Out-of-Pocket Health Spending (Mexican Pesos)",
-    color = "Treatment",
-    caption = "Source: King et al. (2009) via primer.data::sps"
-  )
-```
-
-```{r}
 #| cache: true
 fit_sp <- linear_reg(engine = "lm") |> fit(t2_health_exp_3m ~ treatment, data = x)
 ```
 
 ```{r}
-tidy(fit_sp, conf.int = TRUE) |>
-  select(term, estimate, conf.low, conf.high) |>
-  mutate(across(c(estimate, conf.low, conf.high), \(x) signif(x, 3))) |>
-  gt() |>
-  tab_header(title = "Estimates and 95% Confidence Intervals for Parameters",
-             subtitle = "Source: King et al. (2009) via primer.data::sps")
+plot_predictions(fit_sp, condition = "treatment", draw = FALSE) |>
+  ggplot(aes(x = treatment, y = estimate, color = treatment)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
+  labs(
+    title = "Predicted Out-of-Pocket Health Spending by Seguro Popular Enrollment",
+    subtitle = "Enrolled households spend about 63 pesos less on average over three months",
+    x = "Treatment Group",
+    y = "Predicted 3-Month Spending (Mexican Pesos)",
+    color = "Treatment",
+    caption = "Source: King et al. (2009) via primer.data::sps"
+  )
 ```
 
-Public health insurance programs aim to reduce the financial burden of medical care on households, particularly out-of-pocket spending that can push families toward poverty. Using data from a randomized rollout of Mexico's Seguro Popular program, evaluated by King et al. (2009) across roughly 27,500 households in seven states, we estimate the average causal effect of enrollment on three-month out-of-pocket health spending. However, because t2_health_exp_3m is heavily right-skewed, with a median of 150 pesos but a maximum past 37,000, a linear model assuming normally distributed errors may poorly capture the true distribution of spending and could be unduly influenced by extreme outliers. We model t2_health_exp_3m, three-month out-of-pocket health spending in pesos, as a linear function of treatment, the randomized assignment to early Seguro Popular enrollment.
+Public health insurance programs aim to reduce the financial burden of medical care on households, particularly out-of-pocket spending that can push families toward poverty. Using data from a randomized rollout of Mexico's Seguro Popular program, evaluated by King et al. (2009) across roughly 27,500 households in seven states, we estimate the average causal effect of enrollment on three-month out-of-pocket health spending. However, because t2_health_exp_3m is heavily right-skewed, with a median of 150 pesos but a maximum past 37,000, a linear model assuming normally distributed errors may poorly capture the true distribution of spending and could be unduly influenced by extreme outliers. We model t2_health_exp_3m, three-month out-of-pocket health spending in pesos, as a linear function of treatment, the randomized assignment to early Seguro Popular enrollment. We estimate that Seguro Popular enrollment reduces three-month out-of-pocket health spending by about 63 pesos on average (95% CI: 22–105 pesos), a small but statistically detectable effect given the large sample size. Our estimates may be wrong for several reasons. First, the model's fitted values cannot reproduce the long right tail of household spending, so households with unusually high medical expenses are poorly captured, even though the average treatment effect is still well-estimated since averages are robust to this kind of misspecification. Second, the data come from a 2005-06 evaluation, while the Minister's decision concerns enrollment today. Third, randomization was at the community level, but actual enrollment is one step downstream of community assignment, meaning some households in treated communities may not have enrolled and some in control communities may have found alternative coverage, which could attenuate or bias our estimate of the effect of actual enrollment. Finally, self-reported spending may undercount true out-of-pocket costs, particularly for informal payments, so the true financial relief from enrollment could be larger than our estimate suggests.
+
+
 
 
 

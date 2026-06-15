@@ -73,7 +73,38 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  treatment        n
+  &lt;fct&gt;        &lt;int&gt;
+1 Not enrolled 13698
+2 Enrolled     13871</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>parsnip model object
 
+
+Call:
+stats::lm(formula = t2_health_exp_3m ~ treatment + age, data = data)
+
+Coefficients:
+      (Intercept)  treatmentEnrolled                age  
+           733.79             -63.46               1.43  </code></pre>
+</div>
+</div>
+<p>Public health insurance programs aim to reduce the financial burden of medical care on households, particularly out-of-pocket spending that can push families toward poverty. Using data from a randomized rollout of Mexico’s Seguro Popular program, evaluated by King et al.&nbsp;(2009) across roughly 27,500 households in seven states, we estimate the average causal effect of enrollment on three-month out-of-pocket health spending. However, because t2_health_exp_3m is heavily right-skewed, with a median of 150 pesos but a maximum past 37,000, a linear model assuming normally distributed errors may poorly capture the true distribution of spending and could be unduly influenced by extreme outliers.</p>
 
 </main>
 <!-- /main column -->
